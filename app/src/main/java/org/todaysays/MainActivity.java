@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,6 +75,8 @@ public class MainActivity extends Activity implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //fresco라이브러리 초기화
+        Fresco.initialize(this);
         setContentView(R.layout.activity_main);
 
         // 변수 초기화
@@ -81,6 +85,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // 초기화
     private void InitVariable() {
+
+
         // 이미지를 넣을 뷰
         task = new phpDown();
         imgTask1 = new back();
@@ -156,7 +162,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 }
                 break;
             case R.id.btn_upload_image:
-                //이미지 디코딩 작업 구현 필요
+                //이미지 업로드 전 디코딩 작업 구현 필요
                 //통짜로 올릴수 없음 4096x4096 초과 업로드 불가
                 if (uploadFilePath != null) {
                     UploadImageToServer uploadimagetoserver = new UploadImageToServer();
@@ -174,6 +180,7 @@ public class MainActivity extends Activity implements OnClickListener {
         protected Bitmap doInBackground(String... urls) {
             // TODO Auto-generated method stub
             try{
+                //http연결
                 URL myFileUrl = new URL(urls[0]);
                 HttpURLConnection conn = (HttpURLConnection)myFileUrl.openConnection();
                 conn.setDoInput(true);
