@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,17 +17,9 @@ import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -51,11 +41,7 @@ public class MainActivity extends Activity implements OnClickListener {
     String imgUrl = "http://128.199.102.18/Mapics/appimg/";
     String serverUrl = "http://128.199.102.18/Mapics/View/appdata.php";
 
-    back imgTask1;
-    back imgTask2;
-    back imgTask3;
-    back imgTask4;
-    phpDown task;
+    PhpDown task;
     ArrayList<ListItem> listItem= new ArrayList<ListItem>();
     int i=0;
 
@@ -85,37 +71,17 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // 초기화
     private void InitVariable() {
-
-
         // 이미지를 넣을 뷰
-        task = new phpDown();
-        imgTask1 = new back();
-        imgTask2 = new back();
-        imgTask3 = new back();
-        imgTask4 = new back();
+        task = new PhpDown();
         imageView1 = (ImageView)findViewById(R.id.imageView1);
         imageView2 = (ImageView)findViewById(R.id.imageView2);
         imageView3 = (ImageView)findViewById(R.id.imageView3);
         imageView4 = (ImageView)findViewById(R.id.imageView4);
 
-        imageView.add(imageView1);
-        imageView.add(imageView2);
-        imageView.add(imageView3);
-        imageView.add(imageView4);
-
         // JSON 통신 테스트
         task.execute(serverUrl);
         // img 받기
-        // 성능이슈 존재. 너무 늦게 받아옴
-        // 이미지가 직렬처리되기때문에 상당히느려짐
-        imgTask1.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,imgUrl + "img2.bmp");
-        imgTask2.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,imgUrl + "img3.bmp");
-        imgTask3.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,imgUrl + "img4.bmp");
-        imgTask4.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,imgUrl + "img5.bmp");
-//        imgTask1.execute(imgUrl + "img2.bmp");
-//        imgTask2.execute(imgUrl + "img3.bmp");
-//        imgTask3.execute(imgUrl + "img4.bmp");
-//        imgTask4.execute(imgUrl + "img5.bmp");
+        //프레스코
 
         // 동작 버튼
         txtView = (TextView)findViewById(R.id.txtView);
@@ -174,105 +140,7 @@ public class MainActivity extends Activity implements OnClickListener {
         }
     }
 
-    private class back extends AsyncTask<String, Void, Bitmap>{
-        Bitmap bmImg;
-        @Override
-        protected Bitmap doInBackground(String... urls) {
-            // TODO Auto-generated method stub
-            try{
-                //http연결
-                URL myFileUrl = new URL(urls[0]);
-                HttpURLConnection conn = (HttpURLConnection)myFileUrl.openConnection();
-                conn.setDoInput(true);
-                conn.connect();
-                //String json = DownloadHtml("http://117.16.243.116/appdata.php");
-                InputStream is = conn.getInputStream();
 
-                bmImg = BitmapFactory.decodeStream(is);
-            } catch (IOException e){
-                e.printStackTrace();
-            }
-            return bmImg;
-        }
-
-        protected void onPostExecute(Bitmap img){
-            imageView.get(i++).setImageBitmap(bmImg);
-        }
-    }
-
-    private class phpDown extends AsyncTask<String, Integer,String>{
-        @Override
-        protected String doInBackground(String... urls) {
-            StringBuilder jsonHtml = new StringBuilder();
-            try{
-                // 연결 url 설정
-                URL url = new URL(urls[0]);
-                // 커넥션 객체 생성
-                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                // 연결되었으면.
-                if(conn != null){
-                    conn.setConnectTimeout(10000);
-                    conn.setUseCaches(false);
-                    // 연결되었음 코드가 리턴되면.
-                    if(conn.getResponseCode() == HttpURLConnection.HTTP_OK){
-                        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-                        for(;;){
-                            // 웹상에 보여지는 텍스트를 라인단위로 읽어 저장.
-                            String line = br.readLine();
-                            if(line == null) break;
-                            // 저장된 텍스트 라인을 jsonHtml에 붙여넣음
-                            jsonHtml.append(line + "\n");
-                        }
-                        br.close();
-                    }
-                    conn.disconnect();
-                }
-            } catch(Exception ex){
-                ex.printStackTrace();
-            }
-            return jsonHtml.toString();
-        }
-
-        protected void onPostExecute(String str){
-            String imgurl;
-            String txt1;
-            String txt2;
-            try{
-
-                JSONObject root = new JSONObject(str);
-                JSONArray ja = root.getJSONArray("results");
-                for(int i=0; i<ja.length(); i++){
-                    JSONObject jo = ja.getJSONObject(i);
-                    imgurl = jo.getString("imgurl");
-                    txt1 = jo.getString("txt1");
-                    txt2 = jo.getString("txt2");
-                    listItem.add(new ListItem(imgurl,txt1,txt2));
-                }
-            }catch(JSONException e){
-                e.printStackTrace();
-            }
-            txtView.setText("urlimg :"+listItem.get(0).getData(0)+"\ntxt1:"+ listItem.get(0).getData(1)+"\ntxt2:"+listItem.get(0).getData(2));
-        }
-    }
-
-
-    // ==================================== 사진을 불러오는 소스코드 ============================
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQ_CODE_PICK_PICTURE) {
-            if (resultCode == Activity.RESULT_OK) {
-                Uri uri = data.getData();
-                String path = getPath(uri);
-                String name = getName(uri);
-
-                uploadFilePath = path;
-                uploadFileName = name;
-
-                Bitmap bit = BitmapFactory.decodeFile(path);
-                imageView.get(0).setImageBitmap(bit);
-            }
-        }
-    }
 
     // 실제 경로 찾기
     private String getPath(Uri uri) {
