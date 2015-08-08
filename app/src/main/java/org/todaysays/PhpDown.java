@@ -8,14 +8,19 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by BongJae on 2015-08-08.
  * php연결하고 텍스트 받아오는 클래스
  */
 public class PhpDown extends AsyncTask<String, Integer, String> {
+    ArrayList<String> authList = new ArrayList<String>();
+
     @Override
     protected String doInBackground(String... urls) {
         StringBuffer jsonHtml = new StringBuffer();
@@ -49,7 +54,7 @@ public class PhpDown extends AsyncTask<String, Integer, String> {
     }
 
     protected void onPostExecute(String str) {
-        String imgurl;
+        String isLogin = null;
         String txt1;
         String txt2;
         try {
@@ -58,10 +63,10 @@ public class PhpDown extends AsyncTask<String, Integer, String> {
             JSONArray ja = root.getJSONArray("results");
             for (int i = 0; i < ja.length(); i++) {
                 JSONObject jo = ja.getJSONObject(i);
-                imgurl = jo.getString("imgurl");
+                isLogin = jo.getString("is_login");
                 txt1 = jo.getString("txt1");
                 txt2 = jo.getString("txt2");
-                //listItem.add(new ListItem(imgurl,txt1,txt2));
+                authList.add(isLogin);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -70,4 +75,9 @@ public class PhpDown extends AsyncTask<String, Integer, String> {
         //테스트
     }
 
+    public List loginAuth(String str) {
+        ArrayList<String> list = new ArrayList<String>();
+        list.add(str);
+        return list;
+    }
 }

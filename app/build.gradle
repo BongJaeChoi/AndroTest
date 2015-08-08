@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "org.todaysays"
-        minSdkVersion 14
+        minSdkVersion 9
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -21,6 +21,10 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('src/main/libs/gson-2.2.4.jar')
     compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.facebook.fresco:fresco:0.5.0+'
+    compile 'com.facebook.fresco:fresco:0.5.0'
+    compile 'com.google.android.gms:play-services:7.3.0'
 }
+
+
